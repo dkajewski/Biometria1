@@ -62,6 +62,9 @@ public class Main{
 		JButton brighter = new JButton("Brighter");
 		brighter.setBounds((rightPanel.getWidth()/2)-70, 350, 150, 40);
 		
+		JButton darker = new JButton("Darker");
+		darker.setBounds((rightPanel.getWidth()/2)-70, 400, 150, 40);
+		
 		
 		save.setBounds((rightPanel.getWidth()/2)-70, 200, 150, 40);
 		save.setEnabled(false);
@@ -331,6 +334,16 @@ public class Main{
 		
 		});
 		
+		darker.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				darkImage();
+				
+			}
+			
+		});
+		
 		rightPanel.add(browse);
 		rightPanel.add(R);
 		rightPanel.add(Rvalue);
@@ -342,6 +355,7 @@ public class Main{
 		rightPanel.add(save);
 		rightPanel.add(histograms);
 		rightPanel.add(brighter);
+		rightPanel.add(darker);
 		panel.add(leftPanel);
 		panel.add(rightPanel);
 		
@@ -357,9 +371,9 @@ public class Main{
 		for(int x=0; x<img.getWidth(); x++){
 			for(int y=0; y<img.getHeight(); y++){
 				int clr= img.getRGB(x, y);
-				r   = ((clr & 0x00ff0000) >> 16)*1.0;
+				r = ((clr & 0x00ff0000) >> 16)*1.0;
     			g = ((clr & 0x0000ff00) >> 8)*1.0;
-    			b  =  (clr & 0x000000ff)*1.000;
+    			b =  (clr & 0x000000ff)*1.000;
     			rPixels[x][y] = Math.log(r+1)*255;
     			gPixels[x][y] = Math.log(g+1)*255;
     			bPixels[x][y] = Math.log(b+1)*255;
@@ -418,7 +432,7 @@ public class Main{
 		for (int x = 0; x < img.getWidth(); x++) {
 			for (int y = 0; y < img.getHeight(); y++) {
 				//rgbPixels[x][y] = (int) rPixels[x][y] << 16 | (int) gPixels[x][y] << 8 | (int) bPixels[x][y];
-				img.setRGB(x, y, new Color((int)rPixels[x][y], (int)gPixels[x][y], (int)bPixels[x][x]).getRGB());
+				img.setRGB(x, y, new Color((int)rPixels[x][y], (int)gPixels[x][y], (int)bPixels[x][y]).getRGB());
 			}
 		}
 	}
@@ -439,6 +453,50 @@ public class Main{
 			}
 		}
 		return arr;
+	}
+	
+	public static void darkImage(){
+		initRGBarrs();
+		double r, g, b;
+		for (int x = 0; x < img.getWidth(); x++) {
+			for (int y = 0; y < img.getHeight(); y++) {
+				int clr= img.getRGB(x, y);
+				r = ((clr & 0x00ff0000) >> 16)*1.0;
+    			g = ((clr & 0x0000ff00) >> 8)*1.0;
+    			b =  (clr & 0x000000ff)*1.0;
+				rPixels[x][y] = r * r;
+				gPixels[x][y] = g * g;
+				bPixels[x][y] = b * b;
+			}
+		}
+		normalizeRGB();
+		
+		File tempFile = new File("temp.png");
+		String path = tempFile.getAbsolutePath();
+        String tempFilePath = "file:///";
+        System.out.println("pliczek");
+        for(int i=0; i<path.length(); i++){
+        	if(path.charAt(i)=='\\'){
+        		tempFilePath+="/";
+        	}else{
+        		tempFilePath+=path.charAt(i);
+        	}
+        }
+		try {
+			ImageIO.write(img, "png", tempFile);
+			image = new ImageComponent(tempFilePath);
+			img = image.getImg();
+			
+			imagePanel.removeAll();
+			imagePanel.add(slider);
+			JScrollPane scroll = new JScrollPane(image);
+			scroll.setPreferredSize(new Dimension(570, 520));
+			scroll.setVisible(true);
+			imagePanel.add(scroll);
+			imagePanel.revalidate();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 }
 
