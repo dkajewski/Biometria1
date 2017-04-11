@@ -39,6 +39,14 @@ public class Main{
 	
 	static JPanel imagePanel = new JPanel();
 	static JSlider slider = new JSlider();
+	static JPanel leftPanel = new JPanel();
+	static JTextField Rvalue = new JTextField();
+	static JTextField Gvalue = new JTextField();
+	static JTextField Bvalue = new JTextField();
+	static JLabel selectedColor = new JLabel();
+	static JButton save = new JButton("Save");
+	static JButton histograms = new JButton("Histograms");
+	static JScrollPane scroll = new JScrollPane();
 	
 	static double[][] rPixels;
 	static double[][] gPixels;
@@ -50,23 +58,35 @@ public class Main{
 		frame.setSize(new Dimension(1000, 600));
 		
 		JPanel panel = new JPanel();
-		JPanel leftPanel = new JPanel();
+		
 		JPanel rightPanel = new JPanel();
 		rightPanel.setSize(new Dimension(400, 600));
 		
-		JButton save = new JButton("Save");
-		JButton histograms = new JButton("Histograms");
-		histograms.setBounds((rightPanel.getWidth()/2)-70, 250, 150, 40);
+		histograms.setBounds((rightPanel.getWidth()/2)-70, 220, 150, 40);
 		histograms.setEnabled(false);
 		
 		JButton brighter = new JButton("Brighter");
-		brighter.setBounds((rightPanel.getWidth()/2)-70, 350, 150, 40);
+		brighter.setBounds((rightPanel.getWidth()/2)-70, 300, 150, 40);
 		
 		JButton darker = new JButton("Darker");
-		darker.setBounds((rightPanel.getWidth()/2)-70, 400, 150, 40);
+		darker.setBounds((rightPanel.getWidth()/2)-70, 350, 150, 40);
 		
+		JLabel minLbl = new JLabel("min:");
+		minLbl.setBounds((rightPanel.getWidth()/2)-190, 410, 50, 20);
 		
-		save.setBounds((rightPanel.getWidth()/2)-70, 200, 150, 40);
+		JTextField minVal = new JTextField();
+		minVal.setBounds((rightPanel.getWidth()/2)-160, 410, 50, 20);
+		
+		JLabel maxLbl = new JLabel("max:");
+		maxLbl.setBounds((rightPanel.getWidth()/2)-100, 410, 50, 20);
+		
+		JTextField maxVal = new JTextField();
+		maxVal.setBounds((rightPanel.getWidth()/2)-70, 410, 50, 20);
+		
+		JButton stretch = new JButton("Stretch");
+		stretch.setBounds((rightPanel.getWidth()/2), 400, 150, 40);
+		
+		save.setBounds((rightPanel.getWidth()/2)-70, 170, 150, 40);
 		save.setEnabled(false);
 		save.addActionListener(new ActionListener(){
 
@@ -114,26 +134,22 @@ public class Main{
 		JLabel R = new JLabel("R:");
 		R.setBounds(90, 120, 20, 20);
 		
-		JTextField Rvalue = new JTextField();
 		Rvalue.setBounds(103, 120, 30, 20);
 		
 		JLabel G = new JLabel("G:");
 		G.setBounds(180, 120, 20, 20);
 		
-		JTextField Gvalue = new JTextField();
 		Gvalue.setBounds(193, 120, 30, 20);
 		
 		JLabel B = new JLabel("B:");
 		B.setBounds(270, 120, 20, 20);
 		
-		JTextField Bvalue = new JTextField();
 		Bvalue.setBounds(283, 120, 30, 20);
 		
 		Rvalue.setText("0");
 		Gvalue.setText("0");
 		Bvalue.setText("0");
 		
-		JLabel selectedColor = new JLabel();
 		selectedColor.setBounds(192, 80, 30, 30);
 		selectedColor.setBackground(Color.BLACK);
 		selectedColor.setOpaque(true);
@@ -226,91 +242,7 @@ public class Main{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser fc = new JFileChooser();
-				fc.setCurrentDirectory(new File(System.getProperty("user.home")+"\\Desktop"));
-				int returnVal = fc.showOpenDialog(fc);
-
-		        if (returnVal == JFileChooser.APPROVE_OPTION) {
-		            File file = fc.getSelectedFile();
-		            System.out.println("Otwieranie: " + file.getName() + ".");
-		            
-		            String path = file.getAbsolutePath();
-		            String filePath = "file:///";
-		            for(int i=0; i<path.length(); i++){
-		            	if(path.charAt(i)=='\\'){
-		            		filePath+="/";
-		            	}else{
-		            		filePath+=path.charAt(i);
-		            	}
-		            }
-		            
-		            System.out.println(filePath);
-		            
-		            try {
-		            	imagePanel.setPreferredSize(new Dimension(600, 550));
-						image = new ImageComponent(filePath);
-						img = image.getImg();
-						image.addMouseListener(new MouseListener() {
-							
-							@Override
-							public void mouseReleased(MouseEvent arg0) {
-								
-							}
-							
-							@Override
-							public void mousePressed(MouseEvent e) {
-								
-								x = (int)(e.getX()/zoom);
-								y = (int)(e.getY()/zoom);
-								
-								System.out.println(x+" "+y);
-								int clr=  img.getRGB(x, y);
-								red   = (clr & 0x00ff0000) >> 16;
-		            			green = (clr & 0x0000ff00) >> 8;
-		            			blue  =  clr & 0x000000ff;
-								Rvalue.setText(red+"");
-								Gvalue.setText(green+"");
-								Bvalue.setText(blue+"");
-								selectedColor.setBackground(new Color(red, green, blue));
-							}
-							
-							@Override
-							public void mouseExited(MouseEvent arg0) {
-								
-							}
-							
-							@Override
-							public void mouseEntered(MouseEvent arg0) {
-								
-							}
-							
-							@Override
-							public void mouseClicked(MouseEvent arg0) {
-								
-							}
-						});
-						
-						//leftPanel.setBackground(Color.CYAN);
-						imagePanel.add(slider);
-						JScrollPane scroll = new JScrollPane(image);
-						scroll.setPreferredSize(new Dimension(570, 520));
-						scroll.setVisible(true);
-						imagePanel.add(scroll);
-						//leftPanel.add(scroll);
-						//imagePanel.revalidate();
-						leftPanel.add(imagePanel);
-						leftPanel.revalidate();
-						save.setEnabled(true);
-						histograms.setEnabled(true);
-						
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-		            
-		        } else {
-		            System.out.println("Operacja anulowana przez u¿ytkownika");
-		        }			
+				browse();	
 			}
 			
 		});
@@ -344,6 +276,16 @@ public class Main{
 			
 		});
 		
+		stretch.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				stretchImage(Integer.parseInt(minVal.getText()), Integer.parseInt(maxVal.getText()));
+				
+			}
+			
+		});
+		
 		rightPanel.add(browse);
 		rightPanel.add(R);
 		rightPanel.add(Rvalue);
@@ -356,6 +298,11 @@ public class Main{
 		rightPanel.add(histograms);
 		rightPanel.add(brighter);
 		rightPanel.add(darker);
+		rightPanel.add(minLbl);
+		rightPanel.add(minVal);
+		rightPanel.add(maxLbl);
+		rightPanel.add(maxVal);
+		rightPanel.add(stretch);
 		panel.add(leftPanel);
 		panel.add(rightPanel);
 		
@@ -497,6 +444,148 @@ public class Main{
 		} catch(IOException e){
 			e.printStackTrace();
 		}
+	}
+	
+	public static void stretchImage(int min, int max){
+		initRGBarrs();
+		double r, g, b;
+		int aa = img.getRGB(7, 9);
+		double a = ((aa & 0x00ff0000) >> 16)*1.0;
+		double bb = ((aa & 0x0000ff00) >> 8)*1.0;
+		double c =  (aa & 0x000000ff)*1.0;
+		System.out.println(a/255 + " " + bb/255 + " " + c/255);
+		for (int x = 0; x < img.getWidth(); x++) {
+			for (int y = 0; y < img.getHeight(); y++) {
+				int clr= img.getRGB(x, y);
+				r = (((clr & 0x00ff0000) >> 16)*1.0) / 255;
+    			g = (((clr & 0x0000ff00) >> 8)*1.0) / 255;
+    			b =  ((clr & 0x000000ff)*1.0) / 255;
+				rPixels[x][y] = 255 / (max - min) * (r * 255 - min);
+				gPixels[x][y] = 255 / (max - min) * (g * 255 - min);
+				bPixels[x][y] = 255 / (max - min) * (b * 255 - min);
+			}
+		}
+		
+		normalizeRGB();
+		
+		File tempFile = new File("temp.png");
+		String path = tempFile.getAbsolutePath();
+        String tempFilePath = "file:///";
+        System.out.println("pliczek");
+        for(int i=0; i<path.length(); i++){
+        	if(path.charAt(i)=='\\'){
+        		tempFilePath+="/";
+        	}else{
+        		tempFilePath+=path.charAt(i);
+        	}
+        }
+		try {
+			ImageIO.write(img, "png", tempFile);
+			image = new ImageComponent(tempFilePath);
+			img = image.getImg();
+			
+			imagePanel.removeAll();
+			imagePanel.add(slider);
+			JScrollPane scroll = new JScrollPane(image);
+			scroll.setPreferredSize(new Dimension(570, 520));
+			scroll.setVisible(true);
+			imagePanel.add(scroll);
+			imagePanel.revalidate();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public static void browse(){
+		if(imagePanel!=null){
+			imagePanel.remove(slider);
+			imagePanel.remove(scroll);
+		}
+		JFileChooser fc = new JFileChooser();
+		fc.setCurrentDirectory(new File(System.getProperty("user.home")+"\\Desktop"));
+		int returnVal = fc.showOpenDialog(fc);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            System.out.println("Otwieranie: " + file.getName() + ".");
+            
+            String path = file.getAbsolutePath();
+            String filePath = "file:///";
+            for(int i=0; i<path.length(); i++){
+            	if(path.charAt(i)=='\\'){
+            		filePath+="/";
+            	}else{
+            		filePath+=path.charAt(i);
+            	}
+            }
+            
+            System.out.println(filePath);
+            
+            try {
+            	imagePanel.setPreferredSize(new Dimension(600, 550));
+				image = new ImageComponent(filePath);
+				img = image.getImg();
+				image.addMouseListener(new MouseListener() {
+					
+					@Override
+					public void mouseReleased(MouseEvent arg0) {
+						
+					}
+					
+					@Override
+					public void mousePressed(MouseEvent e) {
+						
+						x = (int)(e.getX()/zoom);
+						y = (int)(e.getY()/zoom);
+						
+						System.out.println(x+" "+y);
+						int clr=  img.getRGB(x, y);
+						red   = (clr & 0x00ff0000) >> 16;
+            			green = (clr & 0x0000ff00) >> 8;
+            			blue  =  clr & 0x000000ff;
+						Rvalue.setText(red+"");
+						Gvalue.setText(green+"");
+						Bvalue.setText(blue+"");
+						selectedColor.setBackground(new Color(red, green, blue));
+					}
+					
+					@Override
+					public void mouseExited(MouseEvent arg0) {
+						
+					}
+					
+					@Override
+					public void mouseEntered(MouseEvent arg0) {
+						
+					}
+					
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+						
+					}
+				});
+				
+				//leftPanel.setBackground(Color.CYAN);
+				imagePanel.add(slider);
+				scroll = new JScrollPane(image);
+				scroll.setPreferredSize(new Dimension(570, 520));
+				scroll.setVisible(true);
+				imagePanel.add(scroll);
+				//leftPanel.add(scroll);
+				//imagePanel.revalidate();
+				leftPanel.add(imagePanel);
+				leftPanel.revalidate();
+				save.setEnabled(true);
+				histograms.setEnabled(true);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            
+        } else {
+            System.out.println("Operacja anulowana przez u¿ytkownika");
+        }	
 	}
 }
 
