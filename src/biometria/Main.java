@@ -690,7 +690,7 @@ public class Main {
 	}
 
 	public static void getPixelsValues() {
-		double mean = 0;
+		//double mean = 0;
 		//pixelsColor = new Color[(int) img.getWidth()][(int) img.getHeight()];
 		double r, g, b;
 		for (int x = 0; x < img.getWidth(); x++) {
