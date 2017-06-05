@@ -42,6 +42,8 @@ public class Main{
 	static int[] blueValues = new int[256];
 	static int[] meanValues = new int[256];
 	
+	private static Color[][] imageColors;
+	
 	static double[][] meanPixels;
 	
 	static JPanel imagePanel = new JPanel();
@@ -110,6 +112,9 @@ public class Main{
 		
 		JButton niblack = new JButton("Niblack");
 		niblack.setBounds((rightPanel.getWidth()/2)-50, 380, 100, 40);
+		
+		JButton kuwahara = new JButton("Kuwahara");
+		kuwahara.setBounds(0, 420, 100, 30);
 		
 		save.setBounds((rightPanel.getWidth()/2)-70, 150, 150, 40);
 		save.setEnabled(false);
@@ -339,6 +344,24 @@ public class Main{
 			}
 		});
 		
+		kuwahara.addActionListener(new ActionListener(){
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				imageColors = new Color[img.getWidth()][img.getHeight()];
+
+		        for (int j = 0; j < imageColors.length; j++) {
+		            for (int k = 0; k < imageColors[0].length; k++) {
+		                Color c = new Color(img.getRGB(j,k));
+
+		                imageColors[j][k] = c;
+		            }
+		        }
+		        
+		        Kuwahara();
+			}
+		});
+		
 		rightPanel.add(browse);
 		rightPanel.add(R);
 		rightPanel.add(Rvalue);
@@ -362,6 +385,7 @@ public class Main{
 		rightPanel.add(ratio);
 		rightPanel.add(width);
 		rightPanel.add(niblack);
+		rightPanel.add(kuwahara);
 		panel.add(leftPanel);
 		panel.add(rightPanel);
 		
@@ -766,6 +790,143 @@ public class Main{
 		}
 		return mean / a;
 	}
+	
+	public static void Kuwahara(){
+		//initRGBarrs();
+        int w = img.getWidth(), h = img.getHeight();
+        double rm[] = new double[4], gm[] = new double[4], bm[] = new double[4];  //wartosci srednie
+        double rs[] = new double[4], gs[] = new double[4], bs[] = new double[4];  //wariancje
+        int mr, mg, mb;
+        int margin = 2;
+
+
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+
+                //mean
+                for (int k=0; k<4; k++)
+                {
+                    rm[k] = 0;
+                    gm[k] = 0;
+                    bm[k] = 0;
+                }
+
+                for (int k = 0; k < 3; k++) {
+                    for (int l = 0; l < 3; l++) {
+
+                        if(i+k-margin >= 0 && j+l-margin >=0 && i+k-margin < w && j+l-margin < h) {
+                            rm[0] += imageColors[i + k - margin][j + l - margin].getRed() / 9.0;
+                            gm[0] += imageColors[i + k - margin][j + l - margin].getGreen() / 9.0;
+                            bm[0] += imageColors[i + k - margin][j + l - margin].getBlue() / 9.0;
+                        }
+
+                        if(i+k < w && j+l-margin >=0 && j+l-margin < h) {
+                            rm[1] += imageColors[i + k][j + l - margin].getRed() / 9.0;
+                            gm[1] += imageColors[i + k][j + l - margin].getGreen() / 9.0;
+                            bm[1] += imageColors[i + k][j + l - margin].getBlue() / 9.0;
+                        }
+
+                        if(j+l < h && i+k-margin >= 0 && i+k-margin < w) {
+                            rm[2] += imageColors[i + k - margin][j + l].getRed() / 9.0;
+                            gm[2] += imageColors[i + k - margin][j + l].getGreen() / 9.0;
+                            bm[2] += imageColors[i + k - margin][j + l].getBlue() / 9.0;
+                        }
+
+                        if(i+k < w && j+l < h) {
+                            rm[3] += imageColors[i + k][j + l].getRed() / 9.0;
+                            gm[3] += imageColors[i + k][j + l].getGreen() / 9.0;
+                            bm[3] += imageColors[i + k][j + l].getBlue() / 9.0;
+                        }
+                    }
+                }
+
+                //variance
+                for (int k=0; k<4; k++)
+                {
+                    rs[k] = 0;
+                    gs[k] = 0;
+                    bs[k] = 0;
+                }
+
+                for (int k=0; k<3; k++) {
+                    for (int l = 0; l < 3; l++) {
+                        if(i+k-margin >= 0 && j+l-margin >=0 && i+k-margin < w && j+l-margin < h) {
+                            rs[0] += Math.pow(imageColors[i + k - margin][j + l - margin].getRed() - rm[0], 2);
+                            gs[0] += Math.pow(imageColors[i + k - margin][j + l - margin].getGreen() - gm[0], 2);
+                            bs[0] += Math.pow(imageColors[i + k - margin][j + l - margin].getBlue() - bm[0], 2);
+                        }
+
+                        if(i+k < w && j+l-margin >=0 && j+l-margin < h) {
+                            rs[1] += Math.pow(imageColors[i + k][j + l - margin].getRed() - rm[1], 2);
+                            gs[1] += Math.pow(imageColors[i + k][j + l - margin].getGreen() - gm[1], 2);
+                            bs[1] += Math.pow(imageColors[i + k][j + l - margin].getBlue() - bm[1], 2);
+                        }
+
+                        if(j+l < h && i+k-margin >= 0 && i+k-margin < w) {
+                            rs[2] += Math.pow(imageColors[i + k - margin][j + l].getRed() - rm[2], 2);
+                            gs[2] += Math.pow(imageColors[i + k - margin][j + l].getGreen() - gm[2], 2);
+                            bs[2] += Math.pow(imageColors[i + k - margin][j + l].getBlue() - bm[2], 2);
+                        }
+
+                        if(i+k < w && j+l < h) {
+                            rs[3] += Math.pow(imageColors[i + k][j + l].getRed() - rm[3], 2);
+                            gs[3] += Math.pow(imageColors[i + k][j + l].getGreen() - gm[3], 2);
+                            bs[3] += Math.pow(imageColors[i + k][j + l].getBlue() - bm[3], 2);
+                        }
+                    }
+                }
+
+                mr=0;
+                for (int k=1; k<4; k++)
+                    if (rs[k] < rs[mr])
+                        mr = k;
+
+                mg=0;
+                for (int k=1; k<4; k++)
+                    if (gs[k] < gs[mg])
+                        mg = k;
+
+                mb=0;
+                for (int k=1; k<4; k++)
+                    if (bs[k] < bs[mb])
+                        mb = k;
+
+                Color c = new Color((int)rm[mr], (int)gm[mg], (int)bm[mb]);
+                img.setRGB(i,j,c.getRGB());
+
+            }
+
+        }
+        
+        //normalizeRGB();
+        
+        File tempFile = new File("temp.png");
+		String path = tempFile.getAbsolutePath();
+        String tempFilePath = "file:///";
+        System.out.println("pliczek");
+        for(int i=0; i<path.length(); i++){
+        	if(path.charAt(i)=='\\'){
+        		tempFilePath+="/";
+        	}else{
+        		tempFilePath+=path.charAt(i);
+        	}
+        }
+		try {
+			ImageIO.write(img, "png", tempFile);
+			image = new ImageComponent(tempFilePath);
+			img = image.getImg();
+			
+			imagePanel.removeAll();
+			imagePanel.add(slider);
+			JScrollPane scroll = new JScrollPane(image);
+			scroll.setPreferredSize(new Dimension(570, 520));
+			scroll.setVisible(true);
+			imagePanel.add(scroll);
+			imagePanel.revalidate();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+    }
 	
 	public static void browse(){
 		if(imagePanel!=null){
