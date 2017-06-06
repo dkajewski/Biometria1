@@ -116,6 +116,29 @@ public class Main{
 		JButton kuwahara = new JButton("Kuwahara");
 		kuwahara.setBounds(0, 420, 100, 30);
 		
+		JTextField _1 = new JTextField("0");
+		JTextField _2 = new JTextField("0");
+		JTextField _3 = new JTextField("0");
+		JTextField _4 = new JTextField("0");
+		JTextField _5 = new JTextField("0");
+		JTextField _6 = new JTextField("0");
+		JTextField _7 = new JTextField("0");
+		JTextField _8 = new JTextField("0");
+		JTextField _9 = new JTextField("0");
+		
+		_1.setBounds(0, 455, 20, 20);
+		_2.setBounds(20, 455, 20, 20);
+		_3.setBounds(40, 455, 20, 20);
+		_4.setBounds(0, 475, 20, 20);
+		_5.setBounds(20, 475, 20, 20);
+		_6.setBounds(40, 475, 20, 20);
+		_7.setBounds(0, 495, 20, 20);
+		_8.setBounds(20, 495, 20, 20);
+		_9.setBounds(40, 495, 20, 20);
+		
+		JButton konwol = new JButton("Kon");
+		konwol.setBounds(60, 475, 100, 20);
+		
 		save.setBounds((rightPanel.getWidth()/2)-70, 150, 150, 40);
 		save.setEnabled(false);
 		save.addActionListener(new ActionListener(){
@@ -362,6 +385,29 @@ public class Main{
 			}
 		});
 		
+		konwol.addActionListener(new ActionListener(){
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0){
+				imageColors = new Color[img.getWidth()][img.getHeight()];
+
+		        for (int j = 0; j < imageColors.length; j++) {
+		            for (int k = 0; k < imageColors[0].length; k++) {
+		                Color c = new Color(img.getRGB(j,k));
+
+		                imageColors[j][k] = c;
+		            }
+		        }
+				
+				int[][] kernel = {
+						{Integer.parseInt(_1.getText()),Integer.parseInt(_2.getText()),Integer.parseInt(_3.getText())},
+						{Integer.parseInt(_4.getText()),Integer.parseInt(_5.getText()),Integer.parseInt(_6.getText())},
+						{Integer.parseInt(_7.getText()),Integer.parseInt(_8.getText()),Integer.parseInt(_9.getText())}
+				};
+				Konwolucja(kernel);
+			}
+		});
+		
 		rightPanel.add(browse);
 		rightPanel.add(R);
 		rightPanel.add(Rvalue);
@@ -386,6 +432,16 @@ public class Main{
 		rightPanel.add(width);
 		rightPanel.add(niblack);
 		rightPanel.add(kuwahara);
+		rightPanel.add(_1);
+		rightPanel.add(_2);
+		rightPanel.add(_3);
+		rightPanel.add(_4);
+		rightPanel.add(_5);
+		rightPanel.add(_6);
+		rightPanel.add(_7);
+		rightPanel.add(_8);
+		rightPanel.add(_9);
+		rightPanel.add(konwol);
 		panel.add(leftPanel);
 		panel.add(rightPanel);
 		
@@ -899,6 +955,63 @@ public class Main{
         }
         
         //normalizeRGB();
+        
+        File tempFile = new File("temp.png");
+		String path = tempFile.getAbsolutePath();
+        String tempFilePath = "file:///";
+        System.out.println("pliczek");
+        for(int i=0; i<path.length(); i++){
+        	if(path.charAt(i)=='\\'){
+        		tempFilePath+="/";
+        	}else{
+        		tempFilePath+=path.charAt(i);
+        	}
+        }
+		try {
+			ImageIO.write(img, "png", tempFile);
+			image = new ImageComponent(tempFilePath);
+			img = image.getImg();
+			
+			imagePanel.removeAll();
+			imagePanel.add(slider);
+			JScrollPane scroll = new JScrollPane(image);
+			scroll.setPreferredSize(new Dimension(570, 520));
+			scroll.setVisible(true);
+			imagePanel.add(scroll);
+			imagePanel.revalidate();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+    }
+	
+	public static void Konwolucja(int[][] kernel) {
+        int w = img.getWidth(), h = img.getHeight();
+        int sumR = 0, sumG = 0, sumB = 0;
+        int margin = (kernel.length-1)/2;
+
+        for (int i = margin; i < w - margin; i++) {
+            for (int j = margin; j < h - margin; j++) {
+
+                for (int k = 0; k < 3; k++) {
+                    for (int l = 0; l < 3; l++) {
+                        sumR += imageColors[i+k-margin][j+l-margin].getRed() * kernel[k][l];
+                        sumG += imageColors[i+k-margin][j+l-margin].getGreen() * kernel[k][l];
+                        sumB += imageColors[i+k-margin][j+l-margin].getBlue() * kernel[k][l];
+                    }
+                }
+
+                sumR = Math.min(Math.max(sumR,0),255);
+                sumB = Math.min(Math.max(sumB,0),255);
+                sumG = Math.min(Math.max(sumR,0),255);
+
+                Color c = new Color(sumR, sumG, sumB);
+
+                sumR = sumG = sumB = 0;
+
+                img.setRGB(i, j, c.getRGB());
+
+            }
+        }
         
         File tempFile = new File("temp.png");
 		String path = tempFile.getAbsolutePath();
